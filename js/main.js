@@ -1,7 +1,7 @@
 (function(exports) {
 "use strict";
 
-const CELSIUS_COFF = new Decimal('273.15');
+var CELSIUS_COFF = new Decimal('273.15');
 
 function sum(arr) {
     return arr.reduce(function(lhs, rhs) {
@@ -23,22 +23,22 @@ exports.toKelvin = function toKelvin(celsius) {
 
 exports.estimateDiffusionCoefficient = function estimateDiffusionCoefficient(T) {
     // doi: 10.1063/1.2121687
-    const D0    = new Decimal('1.635e-8');
-    const Ts    = new Decimal('215.05');
-    const gamma = new Decimal('2.063');
+    var D0    = new Decimal('1.635e-8');
+    var Ts    = new Decimal('215.05');
+    var gamma = new Decimal('2.063');
     // m^2 s^-1
     return D0.mul(T.div(Ts).sub(1).pow(gamma));
 };
 
 exports.estimateDensity = function estimateDensity(T) {
     // doi: 10.1021/je60064a005
-    const a0 = new Decimal('999.83952');
-    const a1 = new Decimal('16.945176');
-    const a2 = new Decimal('-7.9870401e-3');
-    const a3 = new Decimal('-46.170461e-6');
-    const a4 = new Decimal('105.56302e-9');
-    const a5 = new Decimal('-280.54253e-12');
-    const b  = new Decimal('16.87985e-3');
+    var a0 = new Decimal('999.83952');
+    var a1 = new Decimal('16.945176');
+    var a2 = new Decimal('-7.9870401e-3');
+    var a3 = new Decimal('-46.170461e-6');
+    var a4 = new Decimal('105.56302e-9');
+    var a5 = new Decimal('-280.54253e-12');
+    var b  = new Decimal('16.87985e-3');
 
     // Kelvin -> Celsius
     T = toCelsius(T);
@@ -59,7 +59,7 @@ exports.estimateDensity = function estimateDensity(T) {
 
 exports.estimateIsothermalCompressibility = function estimateIsothermalCompressibility(T) {
     // doi: 10.1021/je60064a005
-    let a0, a1, a2, a3, a4, a5, b;
+    var a0, a1, a2, a3, a4, a5, b;
     if (T.gt(100)) {
         // T < 100
         a0 = new Decimal('50.88496');
@@ -102,23 +102,23 @@ exports.estimateThermalExpansionCoefficient = function estimateThermalExpansionC
     // a(t) = 1/V(t) d/dt V(t)
     //      = r(t)/M d/dt M/r(t)
     //      = r(t) d/dt (1 + bt)/(a0 + a1*t + a2*t^2 + a3*t^3 + a4*t^4 + a5*t^5)
-    const a0 = new Decimal('999.83952');
-    const a1 = new Decimal('16.945176');
-    const a2 = new Decimal('-7.9870401e-3');
-    const a3 = new Decimal('-46.170461e-6');
-    const a4 = new Decimal('105.56302e-9');
-    const a5 = new Decimal('-280.54253e-12');
-    const b  = new Decimal('16.87985e-3');
+    var a0 = new Decimal('999.83952');
+    var a1 = new Decimal('16.945176');
+    var a2 = new Decimal('-7.9870401e-3');
+    var a3 = new Decimal('-46.170461e-6');
+    var a4 = new Decimal('105.56302e-9');
+    var a5 = new Decimal('-280.54253e-12');
+    var b  = new Decimal('16.87985e-3');
 
     // Estimate density
-    let r = estimateDensity(T);
+    var r = estimateDensity(T);
 
     // Kelvin -> Celsius
     T = toCelsius(T);
 
     // K^-1
-    let A = b;
-    let B = sum([
+    var A = b;
+    var B = sum([
         a0,
         a1.mul(T),
         a2.mul(T.pow(2)),
@@ -126,14 +126,14 @@ exports.estimateThermalExpansionCoefficient = function estimateThermalExpansionC
         a4.mul(T.pow(4)),
         a5.mul(T.pow(5)),
     ]);
-    let C = b.mul(T).add(1).mul(sum([
+    var C = b.mul(T).add(1).mul(sum([
         a1,
         a2.mul(T).mul(2),
         a3.mul(T.pow(2)).mul(3),
         a4.mul(T.pow(3)).mul(4),
         a5.mul(T.pow(4)).mul(5),
     ]));
-    let D = B.pow(2);
+    var D = B.pow(2);
     // 10^6 K^-1
     return r.mul(A.div(B).sub(C.div(D))).mul((new Decimal(10)).pow(6));
 };
@@ -141,12 +141,12 @@ exports.estimateThermalExpansionCoefficient = function estimateThermalExpansionC
 
 exports.estimateSpecificHeat = function estimateSpecificHeat(T) {
     // doi: 10.1021/je60064a005
-    const a0 = new Decimal('4.1855');
-    const a1 = new Decimal('0.996185');
-    const a2 = new Decimal('0.0002874');
-    const a3 = new Decimal('5.26');
-    const a4 = new Decimal('0.011160');
-    const a5 = new Decimal('-0.036');
+    var a0 = new Decimal('4.1855');
+    var a1 = new Decimal('0.996185');
+    var a2 = new Decimal('0.0002874');
+    var a3 = new Decimal('5.26');
+    var a4 = new Decimal('0.011160');
+    var a5 = new Decimal('-0.036');
 
     // Kelvin -> Celsius
     T = toCelsius(T);
