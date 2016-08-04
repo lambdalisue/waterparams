@@ -8,21 +8,10 @@
 <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/ui-lightness/jquery-ui.css">
 <link rel="stylesheet" href="css/typography.css">
-<style>
-  #message {
-    display: block;
-    margin: 0.5em 0;
-    padding: 0.5em;
-    font-family: monospace;
-    font-size: large;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-  }
-</style>
 
 <header>
   <h1><a href="/waterparams/">waterparams</a></h1>
-  <h2 class="subscription">Estimate temperature-dependent water parameters</h2>
+  <h2 class="subscription">Estimate temperature-dependent parameters of water</h2>
   <div id="github-buttons">
     <iframe
       src="//ghbtns.com/github-btn.html?user=lambdalisue&repo=waterdiff&type=star&count=true" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
@@ -48,10 +37,10 @@
   <table>
     <thead>
       <tr>
-        <th>Symbol
-        <th>Name
-        <th>Value
-        <th>Reference
+        <th class="symbol">Symbol
+        <th class="name">Name
+        <th class="value">Value
+        <th class="ref">Reference
       </tr>
     </thead>
     <tbody id="result"></tbody>
@@ -69,23 +58,73 @@
 <div>
   <h2>Formula</h2>
 
-  <h3>Self-diffusion coefficient</h3>
-  <p>Formula below was based on a published work by <a href="#c1">Holz M. Heil SR. Sacco A (2000)</a>.
-     Please refer the original paper for the detail.
-
+  <h3>Self-diffusion coefficient [<a href="#c1">1</a>]</h3>
   \begin{align*}
-  D = D_0 [\frac{T}{T_s} - 1]^{\gamma}
-  \end{align*}
-
-  <p>Where:
-
-  \begin{align*}
+  D &= D_0 [\frac{T_K}{T_s} - 1]^{\gamma} \\
+  \text{where} \\
   D_0 &= (1.635 \times 10^{-8} \pm 2.242 \times 10^{-11}) ~ \text{m}^2\text{s}^{-1}, \\
   T_s &= (215.05 \pm 1.20) ~ \text{K}, \\
   \gamma &= 2.063 \pm 0.051
   \end{align*}
 
-  <h3>Density</h3>
+  <h3>Density [<a href="#c2">2</a>]</h3>
+  \begin{align*}
+  \rho &= \frac{a_0 + a_1 T_C + a_2 T_C^2 + a_3 T_C^3 + a_4 T_C^4 + a_5 T_C^5}{1 + b T_C} \\
+  \text{where} \\
+  a_0 &= 999.83952, \\
+  a_1 &= 16.945176, \\
+  a_2 &= -7.9870401 \cdot 10^{-3}, \\
+  a_3 &= -46.170461 \cdot 10^{-6}, \\
+  a_4 &= 105.56302 \cdot 10^{-9}, \\
+  a_5 &= -280.54253 \cdot 10^{-12}, \\
+  b   &= 16.87985 \cdot 10^{-3}
+  \end{align*}
+
+  <h3>Isothermal compressibility [<a href="#c2">2</a>]</h3>
+  \begin{align*}
+  \beta_{T} &= \frac{a_0 + a_1 T_C + a_2 T_C^2 + a_3 T_C^3 + a_4 T_C^4 + a_5 T_C^5}{1 + b T_C} \\
+  \text{where} ~ (T_C < 100) \\
+  a_0 &= 50.88496, \\
+  a_1 &= 0.6163813, \\
+  a_2 &= 1.459187 \cdot 10^{-3}, \\
+  a_3 &= 20.08438 \cdot 10^{-6}, \\
+  a_4 &= -58.47727 \cdot 10^{-9}, \\
+  a_5 &= 410.4110 \cdot 10^{-12}, \\
+  b   &= 19.67348 \cdot 10^{-3} \\
+  \text{or} ~ (100 < T_C < 150) \\
+  a_0 &= 50.884917, \\
+  a_1 &= 0.62590623, \\
+  a_2 &= 1.3848668 \cdot 10^{-3}, \\
+  a_3 &= 21.603427 \cdot 10^{-6}, \\
+  a_4 &= -72.087667 \cdot 10^{-9}, \\
+  a_5 &= 465.45054 \cdot 10^{-12}, \\
+  b   &= 19.859983 \cdot 10^{-3}
+  \end{align*}
+
+  <h3>Thermal expansion coefficient [<a href="#c2">2</a>]</h3>
+
+  \begin{align*}
+  \alpha_{P} &= \frac{1}{V} \frac{\partial}{\partial T_C} V \\
+             &= \frac{1}{\frac{M}{\rho}} \frac{\partial}{\partial T_C} \frac{M}{\rho} \\
+             &= \rho \frac{\partial}{\partial T_C} \frac{1}{\rho} \\
+             &= \rho \frac{\partial}{\partial T_C} \frac{1 + b T_C}{a_0 + a_1 T_C + a_2 T_C^2 + a_3 T_C^3 + a_4 T_C^4 + a_5 T_C^5} \\
+             &= \rho \frac{b}{a_0 + a_1 T_C + a_2 T_C^2 + a_3 T_C^3 + a_4 T_C^4 + a_5 T_C^5} -
+             \frac{(b T_C + 1)(a_1 + 2 a_2 t + 3 a_3 t^2 + 4 a_4 t^3 + 5 a_5 t^4)}{(a_0 + a_1 T_C + a_2 T_C^2 + a_3 T_C^3 + a_4 T_C^4 + a_5 T_C^5)^2} \\
+  \text{where} \\
+  a_0 &= 999.83952, \\
+  a_1 &= 16.945176, \\
+  a_2 &= -7.9870401 \cdot 10^{-3}, \\
+  a_3 &= -46.170461 \cdot 10^{-6}, \\
+  a_4 &= 105.56302 \cdot 10^{-9}, \\
+  a_5 &= -280.54253 \cdot 10^{-12}, \\
+  b   &= 16.87985 \cdot 10^{-3}
+  \end{align*}
+
+  <h3>Specific heat [<a href="#c2">2</a>]</h3>
+  \begin{align*}
+  C_P &= 4.1855 (0.996185 + 0.0002874(\frac{T_C + 100}{100})^{5.26} + 0.011160 \cdot 10^{-0.036 T_C})
+  \end{align*}
+
 </div>
 
 <div>
@@ -100,7 +139,7 @@
   <p>&copy; 2016 hashnote.net, &Lambda;lisue
 </footer>
 
-<script src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script src="//raw.githubusercontent.com/MikeMcl/decimal.js-light/master/decimal.min.js"></script>
 <script src="//rawgit.com/alexei/sprintf.js/master/src/sprintf.js"></script>
 <script src="js/main.js"></script>
 <script>
@@ -114,16 +153,20 @@
     event.preventDefault();
     elemResult.innerHTML = '';
 
-    let value = parseFloat(elemTemperature.value, 10);
-    if (isNaN(value)) {
-      elemResult.innerHTML = '<span style="color:red">Please specify a numeric value</span>';
+    let value;
+    try {
+      value = new Decimal(elemTemperature.value);
+    } catch (e) {
+      elemResult.innerHTML = sprintf('<span style="color:red">%s</span>', e);
       return false;
     }
 
     let T = elemUnit.value === 'kelvin' ? value : toKelvin(value);
-    let C = toCelsius(T);
     let D = estimateDiffusionCoefficient(T);
     let R = estimateDensity(T);
+    let C = estimateSpecificHeat(T);
+    let B = estimateIsothermalCompressibility(T);
+    let A = estimateThermalExpansionCoefficient(T);
 
     let addRow = function() {
       elemResult.appendChild(document.importNode(
@@ -132,30 +175,63 @@
     };
 
     td = tempResultRow.content.querySelectorAll('td');
-    td[0].innerHTML = 'T'
+    td[0].innerHTML = 'T<sub>K</sub>'
     td[1].innerHTML = 'Temperature (Kelvin)'
     td[2].innerHTML = sprintf('%.2f K', T);
     td[3].innerHTML = '';
     addRow();
 
-    td[0].innerHTML = 'C'
+    td[0].innerHTML = 'T<sub>C</sub>'
     td[1].innerHTML = 'Temperature (Celsius)'
-    td[2].innerHTML = sprintf('%.2f <sup>&deg;</sup>C', C);
+    td[2].innerHTML = sprintf('%.2f <sup>&deg;</sup>C', toCelsius(T));
     td[3].innerHTML = '';
     addRow();
 
     td[0].innerHTML = 'D'
     td[1].innerHTML = 'Self-diffusion coefficient'
-    td[2].innerHTML = sprintf('%.4e m<sup>2</sup>s<sup>-1</sup>', D);
+    td[2].innerHTML = sprintf(
+      '%.3f &middot; 10<sup>-9</sup> m<sup>2</sup>s<sup>-1</sup>',
+      D.mul((new Decimal(10)).pow(9))
+    );
     td[3].innerHTML = '<a href="#c1">1</a>';
     addRow();
 
     td[0].innerHTML = '&rho;'
-    td[1].innerHTML = 'Density at 1 atm'
-    td[2].innerHTML = sprintf('%.4e g cm<sup>-3</sup>', R);
+    td[1].innerHTML = 'Density (1 atm)'
+    td[2].innerHTML = sprintf(
+      '%.4f kg m<sup>-3</sup>',
+      R
+    );
     td[3].innerHTML = '<a href="#c2">2</a>';
     addRow();
+
+    td[0].innerHTML = '&beta;<sub>T</sub>'
+    td[1].innerHTML = 'Isothermal compressibility'
+    td[2].innerHTML = sprintf(
+      '%.4f &middot; 10<sup>5</sup> MPa<sup>-1</sup>',
+      B
+    );
+    td[3].innerHTML = '<a href="#c2">2</a>';
+    addRow();
+
+    td[0].innerHTML = '&alpha;<sub>P</sub>'
+    td[1].innerHTML = 'Thermal expansion coefficient (1 atm)';
+    td[2].innerHTML = sprintf(
+      '%.2f &middot; 10<sup>6</sup> K<sup>-1</sup>',
+      A
+    );
+    td[3].innerHTML = '<a href="#c2">2</a>';
+    addRow();
+
+    td[0].innerHTML = 'C<sub>P</sub>'
+    td[1].innerHTML = 'Specific heat (1 atm)'
+    td[2].innerHTML = sprintf('%.4f J kg<sup>-1</sup> K<sup>-1</sup>', C);
+    td[3].innerHTML = '<a href="#c2">2</a>';
+    addRow();
+
+
     return false;
   });
 </script>
+<script src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" async></script>
 </html>
