@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset=utf-8 />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+<title>waterparams</title>
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300|Merriweather">
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/ui-lightness/jquery-ui.css">
+<link rel="stylesheet" href="css/typography.css">
+<style>
+  #message {
+    display: block;
+    margin: 0.5em 0;
+    padding: 0.5em;
+    font-family: monospace;
+    font-size: large;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+  }
+</style>
+
+<header>
+  <h1><a href="/waterparams/">waterparams</a></h1>
+  <h2 class="subscription">Estimate temperature-dependent water parameters</h2>
+  <div id="github-buttons">
+    <iframe
+      src="//ghbtns.com/github-btn.html?user=lambdalisue&repo=waterdiff&type=star&count=true" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
+
+    <iframe
+      src="//ghbtns.com/github-btn.html?user=lambdalisue&repo=waterdiff&type=fork&count=true" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
+
+    <iframe src="//ghbtns.com/github-btn.html?user=lambdalisue&type=follow&count=true" frameborder="0" scrolling="0" width="170px" height="20px"></iframe>
+  </div>
+</header>
+
+<div id="calculator">
+  <p>
+    <form id="form">
+      <label for="temperature">Temperature</label>
+      <input id="temperature" placeholder="300">
+      <select id="unit">
+        <option value="kelvin">K</option>
+        <option value="celsius"><sup>&deg;</sup>C</option>
+      </select>
+      <button type="submit">Estimate</button>
+    </form>
+  <table>
+    <thead>
+      <tr>
+        <th>Symbol
+        <th>Name
+        <th>Value
+        <th>Reference
+      </tr>
+    </thead>
+    <tbody id="result"></tbody>
+  </table>
+  <template id="resultrow">
+    <tr>
+      <td class="symbol">
+      <td class="name">
+      <td class="value">
+      <td class="ref">
+    </tr>
+  </template>
+</div>
+
+<div>
+  <h2>Formula</h2>
+
+  <h3>Self-diffusion coefficient</h3>
+  <p>Formula below was based on a published work by <a href="#c1">Holz M. Heil SR. Sacco A (2000)</a>.
+     Please refer the original paper for the detail.
+
+  \begin{align*}
+  D = D_0 [\frac{T}{T_s} - 1]^{\gamma}
+  \end{align*}
+
+  <p>Where:
+
+  \begin{align*}
+  D_0 &= (1.635 \times 10^{-8} \pm 2.242 \times 10^{-11}) ~ \text{m}^2\text{s}^{-1}, \\
+  T_s &= (215.05 \pm 1.20) ~ \text{K}, \\
+  \gamma &= 2.063 \pm 0.051
+  \end{align*}
+
+  <h3>Density</h3>
+</div>
+
+<div>
+  <h2>Reference</h2>
+  <ol>
+      <li><a id="c1" href="http://pubs.rsc.org/en/Content/ArticleLanding/2000/CP/b005319h#!divAbstract" target="_blank">Holz M, Heil SR, Sacco A (2000) Temperature-dependent self-diffusion coefficients of water and six selected molecular liquids for calibration in accurate 1H NMR PFG measurements. Phys Chem Chem Phys 2: 4740–4742.</a>
+      <li><a id="c2" href="" target="_blank">Kell GS (1975) Density, Thermal Expansivity, and Compressibility of Liquid Water from 0" to 150°C: Correlations and Tables for Atmospheric Pressure and Saturation Reviewed and Expressed on 1968 Temperature Scale. J Chem Eng Data 20: 97–105.</a>
+  </ol>
+</div>
+
+<footer>
+  <p>&copy; 2016 hashnote.net, &Lambda;lisue
+</footer>
+
+<script src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script src="//rawgit.com/alexei/sprintf.js/master/src/sprintf.js"></script>
+<script src="js/main.js"></script>
+<script>
+  const elemTemperature = document.querySelector('#temperature');
+  const elemUnit        = document.querySelector('#unit');
+  const elemForm        = document.querySelector('#form');
+  const elemResult      = document.querySelector('#result');
+  const tempResultRow   = document.querySelector('#resultrow');
+
+  elemForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+    elemResult.innerHTML = '';
+
+    let value = parseFloat(elemTemperature.value, 10);
+    if (isNaN(value)) {
+      elemResult.innerHTML = '<span style="color:red">Please specify a numeric value</span>';
+      return false;
+    }
+
+    let T = elemUnit.value === 'kelvin' ? value : toKelvin(value);
+    let C = toCelsius(T);
+    let D = estimateDiffusionCoefficient(T);
+    let R = estimateDensity(T);
+
+    let addRow = function() {
+      elemResult.appendChild(document.importNode(
+        tempResultRow.content, true
+      ));
+    };
+
+    td = tempResultRow.content.querySelectorAll('td');
+    td[0].innerHTML = 'T'
+    td[1].innerHTML = 'Temperature (Kelvin)'
+    td[2].innerHTML = sprintf('%.2f K', T);
+    td[3].innerHTML = '';
+    addRow();
+
+    td[0].innerHTML = 'C'
+    td[1].innerHTML = 'Temperature (Celsius)'
+    td[2].innerHTML = sprintf('%.2f <sup>&deg;</sup>C', C);
+    td[3].innerHTML = '';
+    addRow();
+
+    td[0].innerHTML = 'D'
+    td[1].innerHTML = 'Self-diffusion coefficient'
+    td[2].innerHTML = sprintf('%.4e m<sup>2</sup>s<sup>-1</sup>', D);
+    td[3].innerHTML = '<a href="#c1">1</a>';
+    addRow();
+
+    td[0].innerHTML = '&rho;'
+    td[1].innerHTML = 'Density at 1 atm'
+    td[2].innerHTML = sprintf('%.4e g cm<sup>-3</sup>', R);
+    td[3].innerHTML = '<a href="#c2">2</a>';
+    addRow();
+    return false;
+  });
+</script>
+</html>
